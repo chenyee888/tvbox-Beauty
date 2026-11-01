@@ -73,3 +73,4 @@ https://clun.top/fun.json
 
 </details>
 
+Cloudflare deployment test
