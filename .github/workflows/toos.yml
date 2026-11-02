@@ -1,3 +1,4 @@
+
 name: Update Toos
 
 permissions:
@@ -56,11 +57,9 @@ jobs:
 
     - name: Submit the changes
       run: |
-        export HOME=${GITHUB_WORKSPACE}
-        
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        
+
         if [[ -n "$(git status --porcelain)" ]]; then
           git add -A
           git commit -m "Update m3u"
@@ -69,7 +68,12 @@ jobs:
           echo "No changes detected."
           echo "has_changes=false" >> "$GITHUB_OUTPUT"
         fi
-        
+
+    - name: Configure Git Identity
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
