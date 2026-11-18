@@ -41,10 +41,10 @@ jobs:
           git remote add upstream https://github.com/cluntop/tvbox.git
           git fetch upstream main
 
-      # 合并原项目更新
+      # 合并原项目更新（冲突时中止并报错，等待人工处理，不要留半个合并）
       - name: Merge upstream
         run: |
-          git merge --no-edit upstream/main
+          git merge --no-edit upstream/main || { echo "::error::Upstream merge conflict — manual resolution required"; git merge --abort; exit 1; }
 
       # 推送更新到自己的仓库
       - name: Push changes

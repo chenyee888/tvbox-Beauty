@@ -26,7 +26,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v7
       with:
-        repository: cluntop/tvbox
         token: ${{ secrets.GIT_TOKEN }}
         fetch-depth: 1
 

@@ -1,0 +1,92 @@
+name: Health Check
+
+# 每天检查一次各配置里的站点 / 解析 / 直播地址是否可达。
+# 只出报告，不自动删除任何东西；失效清单见运行摘要（Summary）。
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 每天 10:00 北京时间
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check URLs
+        run: |
+          python3 - <<'PYEOF'
+          import json, urllib.request, urllib.error, socket
+
+          CONFIGS = ['box.json', 'aa.json', 'fun.json', 'jsm.json', 'wv.json', 'test.json']
+          TIMEOUT = 10
+
+          def probe(url):
+              """Return (ok, status). Local files, localhost and non-http(s) are skipped."""
+              if not isinstance(url, str) or not url.startswith(('http://', 'https://')):
+                  return None
+              if '://127.0.0.1' in url or '://localhost' in url or '://192.168.' in url or '://10.' in url:
+                  return None
+              req = urllib.request.Request(url, method='HEAD',
+                                           headers={'User-Agent': 'tvbox-beauty-healthcheck'})
+              try:
+                  with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+                      return (True, r.status)
+              except urllib.error.HTTPError as e:
+                  return (e.code < 500, e.code)
+              except Exception as e:
+                  return (False, type(e).__name__)
+
+          lines = ['# 健康检查报告', '']
+          total = bad = 0
+          for cfg in CONFIGS:
+              try:
+                  data = json.load(open(cfg, encoding='utf-8'))
+              except Exception as e:
+                  lines.append(f'- {cfg}: 解析失败 {e}')
+                  continue
+              urls = []
+              for s in data.get('sites', []) or []:
+                  for k in ('api', 'ext'):
+                      v = s.get(k)
+                      if isinstance(v, str):
+                          urls.append((s.get('name') or s.get('key') or '?', k, v))
+              for p in data.get('parses', []) or []:
+                  urls.append((p.get('name') or '?', 'parse', p.get('url') or ''))
+              for s in data.get('lives', []) or []:
+                  urls.append((s.get('name') or '?', 'live', s.get('url') or ''))
+              dead = []
+              for name, kind, url in urls:
+                  r = probe(url)
+                  if r is None:
+                      continue
+                  total += 1
+                  ok, status = r
+                  if not ok:
+                      bad += 1
+                      dead.append(f'  - [{kind}] {name}: {url} -> {status}')
+              lines.append(f'## {cfg}: {len(dead)} 条不通（共测 {total} 条累计）')
+              lines.extend(dead if dead else ['  - 全部可达'])
+              lines.append('')
+          lines.insert(2, f'总计检查 {total} 条，不通 {bad} 条。')
+          report = '\n'.join(lines)
+          print(report)
+          with open('health-report.md', 'w', encoding='utf-8') as f:
+              f.write(report + '\n')
+          with open('$GITHUB_STEP_SUMMARY', 'w', encoding='utf-8') as f:
+              f.write(report + '\n')
+          PYEOF
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report
+          path: health-report.md
+          retention-days: 30

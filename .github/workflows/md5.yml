@@ -44,18 +44,16 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Stage both js and jar md5 files
-          # git add "*.js.md5" "*.jar.md5"
+          # Stage only the md5 sidecars (never sweep unrelated changes,
+          # and do not miss newly created .md5 files the way `git commit -a` does)
+          git add "*.js.md5" "*.jar.md5"
 
-          # if ! git diff-index --quiet HEAD; then
-            # git commit -m "Update md5"
-            # git push
-            # echo "::notice::MD5 files updated and pushed."
-          # else
-            # echo "::notice::No changes in MD5 values, skipping commit."
-          # fi
-          
-          git commit -a -m "Update md5"
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "Update md5"
+            echo "::notice::MD5 files updated."
+          else
+            echo "::notice::No changes in MD5 values, skipping commit."
+          fi
           
       - name: Push changes
         uses: ad-m/github-push-action@master

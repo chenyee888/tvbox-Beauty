@@ -19,14 +19,13 @@ concurrency:
 
 jobs:
   Update:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v7
       with:
-        repository: cluntop/tvbox
         token: ${{ secrets.GIT_TOKEN }}
         fetch-depth: 1
 
@@ -75,18 +74,13 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         
-        # if [ -n "$(git status --porcelain)" ]; then
-          # echo "Changes detected, committing..."
-          # git add .
-          # git commit -m "Update Test"
-          
-          # git pull --rebase origin main
-          # git push origin main
-        # else
-          # echo "No changes detected, skipping push."
-        # fi
-        
-        git commit -a -m "Update test"
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "Changes detected, committing..."
+          git add -u
+          git commit -m "Update test"
+        else
+          echo "No changes detected, skipping commit."
+        fi
         
     - name: Push changes
       uses: ad-m/github-push-action@master

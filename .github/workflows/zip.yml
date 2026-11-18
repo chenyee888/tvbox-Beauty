@@ -6,8 +6,11 @@ permissions:
   pull-requests: write      # 'write' access to pull requests
 
 on:
-  schedule:
-    - cron: '0 * * * *'  # 每小时运行一次
+  # PAUSED 2026-11-18: the hourly run downloaded an unverified third-party zip
+  # and pushed it into the spider directory, and its push target was the
+  # upstream checkout rather than this repo. Restore only after a rewrite with
+  # a pinned SHA256, an allow-listed destination (js/xiaosa/), and a
+  # conditional commit. Manual dispatch remains for testing that rewrite.
   workflow_dispatch:     # 允许手动触发
 
 env:
@@ -50,6 +53,7 @@ jobs:
         else
           echo "Error: Xiaosa source directory structure changed."
           ls -R
+          exit 1
         fi
         
         cd ..
@@ -77,22 +81,18 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-        # git add .
+        git add -A js/xiaosa/
 
-        # if git diff --staged --quiet; then
-          # echo "No changes to commit."
-          # exit 0
-        # else
-          # COMMIT_MSG="Update zip"
-          # git commit -m "$COMMIT_MSG"
-          
-          # git push origin HEAD:main
-          # echo "Changes pushed successfully."
-        # fi
-        
-        git commit -a -m "Update zip"
+        if git diff --staged --quiet; then
+          echo "No changes to commit."
+          exit 0
+        else
+          git commit -m "Update zip"
+          echo "PUSH_NEEDED=1" >> "$GITHUB_ENV"
+        fi
         
     - name: Push changes
+      if: env.PUSH_NEEDED == '1'
       uses: ad-m/github-push-action@master
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
