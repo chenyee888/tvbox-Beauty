@@ -299,7 +299,7 @@ t5lYKfpe8k83ZA==
                     print("所有域名失败，尝试重新认证...")
                     try:
                         self.ensure_token()
-                    except:
+                    except Exception:
                         pass
                     self.host_index = 0
                 else:

@@ -14,8 +14,10 @@ from base.spider import Spider
 sys.path.append('..')
 
 # ---------- 日志路径 ----------
-# DEBUG_LOG = '/storage/emulated/0/源码/ytb_debug.log'
+DEBUG_LOG = None  # 调试日志已禁用；需要时再填日志路径
 def _ensure_log_dir():
+    if not DEBUG_LOG:
+        return
     try:
         log_dir = os.path.dirname(DEBUG_LOG)
         if log_dir and not os.path.exists(log_dir):
@@ -25,6 +27,8 @@ def _ensure_log_dir():
 _ensure_log_dir()
 
 def debug_log(message, data=None):
+    if not DEBUG_LOG:
+        return
     try:
         log_dir = os.path.dirname(DEBUG_LOG)
         if log_dir and not os.path.exists(log_dir):

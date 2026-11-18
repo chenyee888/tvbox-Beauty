@@ -869,7 +869,7 @@
    "name": "YanG",
    "type": "0",
    "pass": true,
-   "url": "https://https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u",
+   "url": "https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u",
    "epg": "https://epg.112114.xyz/?ch={name}&date={date}",
    "logo": "https://epg.112114.xyz/logo/{name}.png"
   },
@@ -895,27 +895,6 @@
    "name": "gambiarras",
    "type": 0,
    "url": "https://raw.githubusercontent.com/gambiarras/legal-iptv/refs/heads/main/playlist.m3u"
-  },
-  {
-   "name": "epg.pw All",
-   "type": 0,
-   "url": "https://m3u.002397.xyz/all.m3u"
-  },
-  {
-   "name": "iptv.org All",
-   "type": 0,
-   "url": "https://m3u.002397.xyz/o_all.m3u"
-  },
-  {
-   "group": "redirect",
-   "channels":[
-    {
-     "name": "redirect",
-     "urls":[
-      "proxy://do=live&type=live&proxy=&url="
-     ]
-    }
-   ]
   }
  ],
  "doh":[
@@ -990,7 +969,7 @@
   },
   {
    "name": "Quad9",
-   "url": "https://dns.quad9.net/dns-quer",
+   "url": "https://dns.quad9.net/dns-query",
    "ips":[
     "9.9.9.9",
     "149.112.112.112"
@@ -1412,7 +1391,7 @@
    }
   },
   {
-   "name": "盘古",
+   "name": "盘古2",
    "type": 4,
    "url": "https://www.pangujiexi.com/jiexi/?url=",
    "ext": {
@@ -1611,7 +1590,6 @@
   "migu"
  ],
  "warningText": "1",
- "danmaku": "https://127.0.0.1:9978/proxy?do=danmaku&name={name}&episode={episode}",
  "disabled_wallpaper": "./img/0.jpg",
  "wallpaper": "./img/0.jpg",
  "spider": "./jar/xs.jar",

@@ -3459,6 +3459,32 @@ def _img_proxy_url(url, ref=''):
         params['ref'] = ref
     return base + '/img?' + urlencode(params)
 
+def _is_public_url(url):
+    """SSRF guard for the /img proxy: only fetch globally-routable addresses.
+
+    The embedded server is only reachable from the local device (bound to
+    127.0.0.1), but /img used to fetch any URL it was given, which could be
+    abused to probe private networks. Reject loopback / private / link-local
+    / reserved targets before fetching.
+    """
+    try:
+        import ipaddress as _ipaddress
+        import socket as _socket
+        from urllib.parse import urlparse as _urlparse
+        host = _urlparse(url).hostname
+        if not host:
+            return False
+        try:
+            return _ipaddress.ip_address(host).is_global
+        except ValueError:
+            pass
+        infos = _socket.getaddrinfo(host, None)
+        return bool(infos) and all(
+            _ipaddress.ip_address(info[4][0]).is_global for info in infos)
+    except Exception:
+        return False
+
+
 class _PlayHandler(BaseHTTPRequestHandler):
     parser = None
     src_dir = None
@@ -3524,6 +3550,9 @@ class _PlayHandler(BaseHTTPRequestHandler):
         ref = params.get('ref', [''])[0].strip()
         if not (target.startswith('http://') or target.startswith('https://')):
             self._json(400, {'error': 'url invalid'})
+            return
+        if not _is_public_url(target):
+            self._json(400, {'error': 'url not public'})
             return
         try:
             data, ctype = self._img_cached(target, ref)
@@ -4452,7 +4481,7 @@ def _http_request_once(url, method='GET', headers=None, data=None,
     if requests is not None:
         try:
             resp = requests.request(method, url, headers=hdr, data=body,
-                                    timeout=timeout, verify=False)
+                                    timeout=timeout)
             if encoding:
                 resp.encoding = encoding
                 return resp.status_code, resp.text
@@ -4535,7 +4564,7 @@ def http_response(url, method='GET', headers=None, body=None, timeout=20,
     if requests is not None:
         try:
             resp = requests.request((method or 'GET').upper(), url, headers=hdr,
-                                    data=body, timeout=timeout, verify=False)
+                                    data=body, timeout=timeout)
             heads = _headers_to_dict(getattr(resp, 'headers', None))
             text = resp.text if encoding else resp.content
             if encoding:
@@ -5279,7 +5308,7 @@ class HongguoLegacySpider(Spider):
 
         os.environ['APP_PORT'] = str(actual_port)
 
-        server = ThreadingHTTPServer(('0.0.0.0', actual_port), _PlayHandler)
+        server = ThreadingHTTPServer(('127.0.0.1', actual_port), _PlayHandler)
         server_thread = threading.Thread(target=server.serve_forever, daemon=True)
         server_thread.start()
 
@@ -5308,7 +5337,7 @@ class HongguoLegacySpider(Spider):
 
     def _get(self, url):
         try:
-            resp = requests.get(url, headers=self.HEADERS, timeout=25, verify=False)
+            resp = requests.get(url, headers=self.HEADERS, timeout=25)
             resp.encoding = 'utf-8'
             return resp.text
         except Exception:

@@ -101,7 +101,7 @@ class Spider(BaseSpider):
         for i in range(max(1, int(retries or 1))):
             try:
                 r = self._sess.get(url, headers=headers or self.headers,
-                                   timeout=timeout, verify=False, allow_redirects=True)
+                                   timeout=timeout, allow_redirects=True)
                 r.encoding = "utf-8"
                 last = r.text or ""
                 # CF 拦截页/超短错误页不值得重试，直接返回交由上层判断
@@ -120,7 +120,7 @@ class Spider(BaseSpider):
         # session 失败则换直连再试一次（排除连接池污染）
         try:
             r = requests.get(url, headers=headers or self.headers,
-                             timeout=timeout, verify=False, allow_redirects=True)
+                             timeout=timeout, allow_redirects=True)
             r.encoding = "utf-8"
             return r.text or last
         except Exception:
@@ -134,7 +134,7 @@ class Spider(BaseSpider):
         for i in range(max(1, int(retries or 1))):
             try:
                 r = self._sess.get(url, headers=self._json_headers,
-                                   timeout=timeout, verify=False, allow_redirects=True)
+                                   timeout=timeout, allow_redirects=True)
                 if r.status_code != 200:
                     return {}
                 try:
@@ -154,7 +154,7 @@ class Spider(BaseSpider):
         # 兜底：换直连再试一次
         try:
             r = requests.get(url, headers=self._json_headers,
-                             timeout=timeout, verify=False, allow_redirects=True)
+                             timeout=timeout, allow_redirects=True)
             if r.status_code == 200:
                 j = r.json()
                 if isinstance(j, dict):

@@ -437,10 +437,6 @@ def _aes_is_fast() -> bool:
     return AES_BACKEND in ("cryptography", "pycryptodome")
 
 
-def _aes_is_fast() -> bool:
-    return AES_BACKEND in ("cryptography", "pycryptodome")
-
-
 def _http_get_bytes(url: str, headers: dict | None = None, timeout: int = 60) -> bytes:
     h = dict(headers or {})
     r = requests.get(url, headers=h, timeout=timeout)

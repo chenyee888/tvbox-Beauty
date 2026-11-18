@@ -30,7 +30,7 @@
    "switchable": 1
   },
   {
-   "key": "wv_3q",
+   "key": "wv_3qys",
    "name": "wv | 3Q影视",
    "api": "csp_WvSpider",
    "type": "3",
@@ -135,13 +135,6 @@
    "api": "csp_WvSpider",
    "type": "3",
    "ext": "./js/央视频.js"
-  },
-  {
-   "key": "push_agent",
-   "name": "Push | 推送",
-   "type": 3,
-   "hide": 1,
-   "api": "csp_Push"
   }
  ],
  "doh":[
@@ -181,7 +174,7 @@
   },
   {
    "name": "Quad9",
-   "url": "https://dns.quad9.net/dns-quer",
+   "url": "https://dns.quad9.net/dns-query",
    "ips":[
     "9.9.9.9",
     "149.112.112.112"

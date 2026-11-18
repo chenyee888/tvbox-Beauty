@@ -32,7 +32,7 @@ fi
 
 # ================= 配置区 =================
 # [P1-4] 仓库地址支持环境变量 GIT_MASTER_REPO_URL 覆盖，硬编码仅作兜底
-MY_REPO_URL="${GIT_MASTER_REPO_URL:-https://github.com/cluntop/tvbox.git}"
+MY_REPO_URL="${GIT_MASTER_REPO_URL:-https://github.com/chenyee888/tvbox-Beauty.git}"
 # 日志路径支持环境变量覆盖
 LOG_FILE="${GIT_MASTER_LOG_FILE:-/storage/emulated/0/box/.github/git.log}"
 LOG_DIR=$(dirname "$LOG_FILE")   # 全局缓存，避免每次调用 dirname

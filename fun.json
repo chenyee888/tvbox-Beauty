@@ -94,14 +94,7 @@
    "api": "./js/ss/redtube.py",
    "ext": ""
   },
-  {
-   "key": "py_Youavhub",
-   "name": "Youavhub[py]",
-   "type": 3,
-   "api": "./js/ss/youav.py",
-   "ext": ""
-  },
-  {
+    {
    "key": "py_owoav",
    "name": "owoav[py]",
    "type": 3,
@@ -509,13 +502,13 @@
    "key": "py_jable",
    "name": "jable[py]",
    "type": 3,
-   "api": "./py/jable.py"
+   "api": "./js/ss/jable.py"
   },
   {
    "key": "py_七区",
    "name": "七区[py]",
    "type": 3,
-   "api": "./py/district.py",
+   "api": "./js/ss/district.py",
    "quickSearch": 1,
    "searchable": 1,
    "filterable": 1
@@ -538,7 +531,7 @@
    "searchable": 1,
    "quickSearch": 1,
    "filterable": 1,
-   "api": "./py/18.py",
+   "api": "./js/ss/18.py",
    "order_num": 5,
    "ext": ""
   },
@@ -983,7 +976,7 @@
   },
   {
    "key": "黄AV资源站",
-   "name": "AV | 采集",
+   "name": "AV | 采集2",
    "type": 0,
    "api": "https://www.pgxdy.com/api/xml.php",
    "searchable": 1,
@@ -1117,13 +1110,7 @@
   }
  ],
  "lives":[
-  {
-   "name": "大洋马直播",
-   "type": 0,
-   "url": "./lib/deyzb.m3u",
-   "ua": ""
-  },
-  {
+    {
    "name": "大秀直播",
    "type": 0,
    "url": "./lib/dxzb.m3u",
@@ -1159,13 +1146,7 @@
    "url": "./lib/mdsp.m3u",
    "ua": ""
   },
-  {
-   "name": "台湾成人",
-   "type": 0,
-   "url": "./lib/rwcr.m3u",
-   "ua": ""
-  },
-  {
+    {
    "name": "test",
    "type": 0,
    "url": "./lib/party.m3u",
@@ -1405,20 +1386,9 @@
   },
   {
    "name": "zwrt",
-   "url": "https://github.com/zwrt/IPTV/blob/Files/Adult.m3u",
+   "url": "https://raw.githubusercontent.com/zwrt/IPTV/Files/Adult.m3u",
    "type": 0,
    "ua": "okhttp/3.15"
-  },
-  {
-   "group": "redirect",
-   "channels":[
-    {
-     "name": "redirect",
-     "urls":[
-      "proxy://do=live&type=live&proxy=&url="
-     ]
-    }
-   ]
   }
  ],
  "doh":[
@@ -1458,7 +1428,7 @@
   },
   {
    "name": "Quad9",
-   "url": "https://dns.quad9.net/dns-quer",
+   "url": "https://dns.quad9.net/dns-query",
    "ips":[
     "9.9.9.9",
     "149.112.112.112"

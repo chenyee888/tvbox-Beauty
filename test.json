@@ -61,39 +61,17 @@
   },
   {
    "key": "youtube2",
-   "name": "YouTube",
+   "name": "YouTube2",
    "type": 3,
    "api": "csp_Youtube",
    "jar": "./jar/yt2.jar",
    "searchable": 1,
    "changeable": 0,
    "ext": "./lib/youtube.json"
-  },
-  {
-   "key": "youtube3",
-   "name": "YouTube",
-   "type": 3,
-   "api": "./py/yt_clun.py",
-   "searchable": 1,
-   "quickSearch": 1,
-   "filterable": 0,
-   "ext": {
-    "cookie": "",
-    "json": "./lib/youtube.json"
-   }
   }
  ],
  "lives":[
-  {
-   "api": "./py/yangshipin.py",
-   "ext": {},
-   "name": "央视频"
-  },
-  {
-   "api": "./py/广东荔枝.py",
-   "ext": {},
-   "name": "广东荔枝"
-  }
+    
  ],
  "spider": "./jar/yt.jar",
  "logo": "./img/pg.gif"

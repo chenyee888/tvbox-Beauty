@@ -14,13 +14,13 @@ const baseUrl = 'https://www.quickvod.fun/';
 async function init(cfg) {
     return {
         webview: {
-            debug: true,
-            showWebView: true,
+            debug: false,
+            showWebView: false,
             widthPercent: 80,
             heightPercent: 60,
             keyword: '',
             returnType: 'dom',
-            timeout: 30,
+            timeout: 15,
             blockImages: true,
             enableJavaScript: true,
             header: { 'Referer': baseUrl },
@@ -84,9 +84,13 @@ async function homeContent(filter) {
  * 首页推荐视频
  */
 async function homeVideoContent() {
-    const document = await Java.wvOpen(baseUrl + '/');
-    const videos = parseVideoList(document);
-    return { list: videos };
+    try {
+        const document = await Java.wvOpen(baseUrl + '/');
+        const videos = parseVideoList(document);
+        return { list: videos };
+    } catch (e) {
+        return { list: [] };
+    }
 }
 
 /**
@@ -100,14 +104,21 @@ async function categoryContent(tid, pg, filter, extend) {
     const sort = extend.sort || '';
     const type = extend.type || tid;
     const lang = extend.lang || '';
+    const letter = extend.letter || '';
 
     // console.log("筛选参数:", extend, `type=${type}, area=${area}, year=${year}, cat=${cat}, sort=${sort}, lang=${lang}`);
     // const document = await Java.wvOpen(`${baseUrl}/list/${type||tid}-${area}-${sort}-${cat}-${lang}----${pg}---${year}.html`);
     const document = await Java.wvOpen(`${baseUrl}/show/${tid}-${area}-${sort}-${type}-${lang}-${letter}---${pg}---${year}.html`);
     const videos = parseVideoList(document);
-    const getPages = document.querySelector("ul > li.active.num").outerText;
-    const pages = getPages.split('/');
-    return { code: 1, msg: "数据列表", list: videos, page: pages[0], pagecount: pages[1], limit: 12, total: pages[1] * 12 };
+    let page = 1, pagecount = 1, total = videos.length;
+    try {
+        const getPages = document.querySelector("ul > li.active.num").outerText;
+        const pages = getPages.split('/');
+        page = parseInt(pages[0]) || 1;
+        pagecount = parseInt(pages[1]) || 1;
+        total = pagecount * 12;
+    } catch (e) {}
+    return { code: 1, msg: "数据列表", list: videos, page: page, pagecount: pagecount, limit: 12, total: total };
 }
 
 /**
@@ -115,16 +126,20 @@ async function categoryContent(tid, pg, filter, extend) {
  */
 async function detailContent(ids) {
 	// Java.showWebView();
-    const document = await Java.wvOpen(ids[0]);
-    const list = parseDetailPage(document);
-    return { code: 1, msg: "数据列表", page: 1, pagecount: 1, limit: 1, total: 1, list };
+    try {
+        const document = await Java.wvOpen(ids[0]);
+        const list = parseDetailPage(document, ids[0]);
+        return { code: 1, msg: "数据列表", page: 1, pagecount: 1, limit: 1, total: 1, list };
+    } catch (e) {
+        return { code: 1, msg: "数据列表", page: 1, pagecount: 1, limit: 1, total: 0, list: [] };
+    }
 }
 
 /**
  * 搜索
  */
 async function searchContent(key, quick, pg) {
-    let res = await Java.req(`${baseUrl}/search/${key}----------${pg}---.html`);
+    let res = await Java.req(`${baseUrl}/search/${encodeURIComponent(key)}----------${pg}---.html`);
     const videos = parseVideoList(res.doc);
     let pages = [1, 1];
     let total = videos.length;
@@ -140,7 +155,8 @@ async function searchContent(key, quick, pg) {
  * 播放器
  */
 async function playerContent(flag, id, vipFlags) {
-    return { url: id, parse: 1 };
+    const direct = /\.(m3u8|mp4)(\?|#|$)/i.test(id || '');
+    return { url: id, parse: direct ? 0 : 1 };
 }
 
 /**
@@ -171,7 +187,9 @@ function parseVideoList(document) {
 
         // 处理 vod_id
         let vodId = titleEl?.getAttribute('href') || '';
-        if (vodId && !vodId.startsWith('http')) {
+        if (vodId.startsWith('//')) {
+            vodId = 'https:' + vodId;
+        } else if (vodId && !vodId.startsWith('http')) {
             vodId = baseUrl + (vodId.startsWith('/') ? '' : '/') + vodId;
         }
 
@@ -195,7 +213,7 @@ function parseVideoList(document) {
 /**
  * 解析详情页
  */
-function parseDetailPage(document) {
+function parseDetailPage(document, vodId) {
     const title = document.querySelector('.stui-content__detail .title')?.textContent.trim() || '';
     const vod_pic = document.querySelector('.stui-content__thumb img')?.src || '';
     const info = document.querySelectorAll('.stui-content__detail .data');
@@ -211,13 +229,16 @@ function parseDetailPage(document) {
     // 播放线路
     const head = document.querySelector('.stui-vodlist__head h3');
     const ul = document.querySelector('.stui-content__playlist');
-    const episodes = ul ? Array.from(ul.querySelectorAll('a')).map(a =>
-        `${a.textContent.trim()}$${baseUrl + a.getAttribute('href')}`) : [];
+    const episodes = ul ? Array.from(ul.querySelectorAll('a')).map(a => {
+        const href = a.getAttribute('href') || '';
+        const url = href.startsWith('http') ? href : baseUrl + (href.startsWith('/') ? '' : '/') + href;
+        return `${a.textContent.trim()}$${url}`;
+    }) : [];
     const vod_play_from = head ? head.textContent.trim().replace('在线播放', '线路') : '';
     const vod_play_url = episodes.join('#');
 
     return [{
-        vod_id: window.location.pathname.replace(/[^\w]/g, '_'),
+        vod_id: vodId || (window.location.pathname || '').replace(/[^\w]/g, '_'),
         vod_name: title,
         vod_pic: vod_pic,
         vod_remarks: vod_remarks,
@@ -225,7 +246,7 @@ function parseDetailPage(document) {
         vod_actor: vod_actor,
         vod_director: vod_director,
         vod_area: vod_area,
-        vod_lang: vod_area.includes('大陆') ? '国语' : '其他',
+        vod_lang: vod_area.includes('大陆') || vod_area.includes('台湾') ? '国语' : vod_area.includes('香港') ? '粤语' : vod_area.includes('日本') ? '日语' : vod_area.includes('韩国') ? '韩语' : (vod_area.includes('美国') || vod_area.includes('欧美')) ? '英语' : '其他',
         vod_content: vod_content,
         vod_play_from: vod_play_from,
         vod_play_url: vod_play_url
